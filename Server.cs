@@ -190,13 +190,18 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 							break;
 
 						case Client.Method.Connect:
-							Connections.Add(sender, new()
 							{
-								Server = this,
-								EndPoint = receiveResult.RemoteEndPoint
-							});
+								if (Connections.TryGetValue(sender, out T connection))
+									connection.Close();
 
-							SendTo(receiveResult.RemoteEndPoint, Method.AcceptConnect);
+								Connections.Add(sender, new()
+								{
+									Server = this,
+									EndPoint = receiveResult.RemoteEndPoint
+								});
+
+								SendTo(receiveResult.RemoteEndPoint, Method.AcceptConnect);
+							}
 							break;
 
 						case Client.Method.Disconnect:
