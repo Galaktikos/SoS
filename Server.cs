@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -89,9 +90,12 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 		if (Disposed)
 			throw new ObjectDisposedException(GetType().FullName);
 
-		lock (Connections)
-			foreach (Connection connection in Connections.Values)
-				connection.Send(data);
+		Connection[] connections;
+		lock (Connections.Values)
+			connections = Connections.Values.ToArray();
+
+		foreach (Connection connection in connections)
+			connection.Send(data);
 	}
 
 	/// <summary>
@@ -103,11 +107,12 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 		if (Disposed)
 			throw new ObjectDisposedException(GetType().FullName);
 
-		CloseTokenSource.Cancel();
-
+		Connection[] connections;
 		lock (Connections.Values)
-			foreach (Connection connection in Connections.Values)
-				connection.Close();
+			connections = Connections.Values.ToArray();
+
+		foreach (Connection connection in connections)
+			connection.Close();
 
 		base.Close();
 	}
@@ -117,10 +122,6 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 	{
 		if (Disposed)
 			return;
-
-		lock (Connections)
-			foreach (Connection connection in Connections.Values)
-				connection.Dispose();
 
 		base.Dispose();
 
