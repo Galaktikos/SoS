@@ -105,7 +105,7 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 
 		CloseTokenSource.Cancel();
 
-		lock (Connections)
+		lock (Connections.Values)
 			foreach (Connection connection in Connections.Values)
 				connection.Close();
 
