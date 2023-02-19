@@ -151,8 +151,6 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 				Memory<byte> data = new Memory<byte>(ReceiveBuffer.Array).Slice(0, receiveResult.ReceivedBytes);
 #endif
 
-				Console.WriteLine("Server Received: " + BitConverter.ToString(data.ToArray()));
-
 				if (data.Length <= 0)
 					return;
 
