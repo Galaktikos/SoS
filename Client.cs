@@ -111,15 +111,19 @@ public abstract class Client : IDisposable
 
 	private async void Update()
 	{
-		while (!CloseTokenSource.IsCancellationRequested)
+		try
 		{
-			if (Connected)
-				Send(Method.KeepAlive);
-			else
-				Send(Method.Connect);
+			while (!CloseTokenSource.IsCancellationRequested)
+			{
+				if (Connected)
+					Send(Method.KeepAlive);
+				else
+					Send(Method.Connect);
 
-			await Task.Delay(1000, CloseTokenSource.Token);
+				await Task.Delay(1000, CloseTokenSource.Token);
+			}
 		}
+		catch (OperationCanceledException) { }
 	}
 
 #if NET7_0
