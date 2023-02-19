@@ -145,8 +145,6 @@ public abstract class Client : IDisposable
 				Memory<byte> data = new Memory<byte>(ReceiveBuffer.Array).Slice(0, receiveResult.ReceivedBytes);
 #endif
 
-				Console.WriteLine("Client Received: " + BitConverter.ToString(data.ToArray()));
-
 				if (data.Length <= 0)
 					return;
 
