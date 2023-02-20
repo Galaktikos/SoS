@@ -10,6 +10,16 @@ public abstract class Client : IDisposable
 {
 	internal enum Method { Connect, KeepAlive, Data, Disconnect }
 
+	/// <summary>
+	/// Delay in milleseconds between connection requests
+	/// </summary>
+	public int ConnectPollDelay = 1000;
+
+	/// <summary>
+	/// Delay in milleseconds between keep-alive packets
+	/// </summary>
+	public int KeepAliveDelay = 1000;
+
 	public bool Connected { get; private set; } = false;
 
 	private readonly CancellationTokenSource CloseTokenSource = new();
@@ -28,7 +38,8 @@ public abstract class Client : IDisposable
 #endif
 
 		Task.Run(Receive);
-		Task.Run(Update);
+		Task.Run(Connect);
+		Task.Run(KeepAlive);
 	}
 
 	/// <summary>
@@ -109,7 +120,22 @@ public abstract class Client : IDisposable
 	protected abstract void OnClose();
 
 
-	private async void Update()
+	private async void Connect()
+	{
+		try
+		{
+			while (!CloseTokenSource.IsCancellationRequested)
+			{
+				if (!Connected)
+					Send(Method.Connect);
+
+				await Task.Delay(ConnectPollDelay, CloseTokenSource.Token);
+			}
+		}
+		catch (OperationCanceledException) { }
+	}
+
+	private async void KeepAlive()
 	{
 		try
 		{
@@ -117,10 +143,8 @@ public abstract class Client : IDisposable
 			{
 				if (Connected)
 					Send(Method.KeepAlive);
-				else
-					Send(Method.Connect);
 
-				await Task.Delay(1000, CloseTokenSource.Token);
+				await Task.Delay(KeepAliveDelay, CloseTokenSource.Token);
 			}
 		}
 		catch (OperationCanceledException) { }
