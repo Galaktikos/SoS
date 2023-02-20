@@ -37,9 +37,13 @@ public abstract class Client : IDisposable
 		ReceiveBuffer = new(new byte[socket.ReceiveBufferSize]);
 #endif
 
-		Task.Run(Receive);
-		Task.Run(Connect);
-		Task.Run(KeepAlive);
+		try
+		{
+			Task.Run(Receive, CloseTokenSource.Token);
+			Task.Run(Connect, CloseTokenSource.Token);
+			Task.Run(KeepAlive, CloseTokenSource.Token);
+		}
+		catch (TaskCanceledException) { }
 	}
 
 	/// <summary>
