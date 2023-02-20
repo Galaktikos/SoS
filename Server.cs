@@ -192,7 +192,7 @@ public class Server<T> : Server, IDisposable where T : Server.Connection, new()
 
 						case Client.Method.Connect:
 							{
-								if (Connections.TryGetValue(sender, out T connection))
+								if (Connections.TryGetValue(sender, out T? connection))
 									connection.Close();
 
 								Connections.Add(sender, new()
